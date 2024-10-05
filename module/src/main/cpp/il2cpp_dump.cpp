@@ -425,5 +425,46 @@ void il2cpp_dump(const char *outDir) {
         outStream << outPuts[i];
     }
     outStream.close();
+    // phigros spec shit start
+    LOGI("Phigros stuff start");
+
+    const uint64_t global_metadata_ptr_offset = 0x45A23C8;
+    auto global_metadata_ptr = *(unsigned char**)(il2cpp_base + global_metadata_ptr_offset);
+    auto metadataOutPath = std::string(outDir).append("/files/global-metadata.dat");
+    std::ofstream metadataStream(metadataOutPath);
+    LOGI("metadata ptr %p", global_metadata_ptr);
+    LOGI("metadata first 4 bytes %02X %02X %02X %02X", 
+        global_metadata_ptr[0], 
+        global_metadata_ptr[1], 
+        global_metadata_ptr[2], 
+        global_metadata_ptr[3]);
+    LOGI("searching length");
+    char* pointer;
+    int endOffset = *(int*)(pointer + 8);
+
+    auto nextOffset = endOffset;
+    bool found = true;
+    for (int offset = 0x8; offset < endOffset; offset += 0x8) {
+    	auto nowOffset = *(int*)(pointer + offset)
+    	if (nowOffset != nextOffset) {
+    		found = false;
+    		break;
+    	}
+    	nextOffset = nowOffset + *(int*)(pointer + offset + 4);
+    }
+    int global_metadata_size = nextOffset;
+    LOGI("length: %d", global_metadata_size);
+    if (!found) {
+        LOGI("Length not found");
+        return;
+    }
+    for (int i = 0; i < global_metadata_size; i++)
+    {
+        metadataStream << global_metadata_ptr[i];
+    }
+    
+    
+    LOGI("Phigros stuff end");
+    // phigros spec shit end
     LOGI("dump done!");
 }
