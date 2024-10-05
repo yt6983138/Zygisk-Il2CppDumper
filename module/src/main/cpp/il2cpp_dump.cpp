@@ -445,7 +445,7 @@ void il2cpp_dump(const char *outDir) {
     auto nextOffset = endOffset;
     bool found = true;
     for (int offset = 0x8; offset < endOffset; offset += 0x8) {
-    	auto nowOffset = *(int*)(pointer + offset)
+    	auto nowOffset = *(int*)(pointer + offset);
     	if (nowOffset != nextOffset) {
     		found = false;
     		break;
