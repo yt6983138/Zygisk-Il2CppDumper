@@ -25,6 +25,53 @@
 
 static uint64_t il2cpp_base = 0;
 
+char** str_split(char* a_str, const char a_delim)
+{
+    char** result    = 0;
+    size_t count     = 0;
+    char* tmp        = a_str;
+    char* last_comma = 0;
+    char delim[2];
+    delim[0] = a_delim;
+    delim[1] = 0;
+
+    /* Count how many elements will be extracted. */
+    while (*tmp)
+    {
+        if (a_delim == *tmp)
+        {
+            count++;
+            last_comma = tmp;
+        }
+        tmp++;
+    }
+
+    /* Add space for trailing token. */
+    count += last_comma < (a_str + strlen(a_str) - 1);
+
+    /* Add space for terminating null string so caller
+       knows where the list of returned strings ends. */
+    count++;
+
+    result = malloc(sizeof(char*) * count);
+
+    if (result)
+    {
+        size_t idx  = 0;
+        char* token = strtok(a_str, delim);
+
+        while (token)
+        {
+            *(result + idx++) = strdup(token);
+            token = strtok(0, delim);
+        }
+        *(result + idx) = 0;
+    }
+
+    return result;
+}
+
+
 void init_il2cpp_api(void *handle) {
 #define DO_API(r, n, p) {                      \
     n = (r (*) p)xdl_sym(handle, #n, nullptr); \
@@ -427,6 +474,7 @@ void il2cpp_dump(const char *outDir) {
     outStream.close();
     // phigros spec shit start
     LOGI("Phigros stuff start");
+    LOGI("pid %d", getpid());
 
     const uint64_t global_metadata_ptr_offset = 0x45A23C8;
     auto global_metadata_ptr = *(unsigned char**)(il2cpp_base + global_metadata_ptr_offset);
@@ -439,26 +487,10 @@ void il2cpp_dump(const char *outDir) {
         global_metadata_ptr[2], 
         global_metadata_ptr[3]);
     LOGI("searching length");
-    char* pointer;
-    unsigned int endOffset = *(unsigned int*)(pointer + 8);
-
-    auto nextOffset = endOffset;
-    bool found = true;
-    for (int offset = 0x8; offset < endOffset; offset += 0x8) {
-    	auto nowOffset = *(unsigned int*)(pointer + offset);
-    	if (nowOffset != nextOffset) {
-    		found = false;
-    		break;
-    	}
-    	nextOffset = nowOffset + *(unsigned int*)(pointer + offset + 4);
-    }
-    //int global_metadata_size = nextOffset;
-    int global_metadata_size = 0x9AB614;
-    LOGI("length: %d", global_metadata_size);
-    if (!found) {
-        LOGI("Length not found");
-        return;
-    }
+    auto p = global_metadata_ptr + (*(unsigned int*)(global_metadata_ptr + 8) - 8);
+    auto global_metadata_size = *(unsigned int*)p + *(unsigned int*)(p + 4);
+    //auto global_metadata_size = 0x9AB614;
+    LOGI("length: %p", global_metadata_size);
     for (int i = 0; i < global_metadata_size; i++)
     {
         metadataStream << global_metadata_ptr[i];
