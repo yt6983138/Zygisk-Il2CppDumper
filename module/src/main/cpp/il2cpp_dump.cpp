@@ -27,7 +27,7 @@ static uint64_t il2cpp_base = 0;
 
 char** str_split(char* a_str, const char a_delim, size_t* count)
 {
-    count = 0;
+    *count = 0;
     char** result    = 0;
     char* tmp        = a_str;
     char* last_comma = 0;
@@ -40,20 +40,20 @@ char** str_split(char* a_str, const char a_delim, size_t* count)
     {
         if (a_delim == *tmp)
         {
-            count++;
+            *count++;
             last_comma = tmp;
         }
         tmp++;
     }
 
     /* Add space for trailing token. */
-    count += last_comma < (a_str + strlen(a_str) - 1);
+    *count += last_comma < (a_str + strlen(a_str) - 1);
 
     /* Add space for terminating null string so caller
        knows where the list of returned strings ends. */
-    count++;
+    *count++;
 
-    result = (char**)malloc(sizeof(char*) * count);
+    result = (char**)malloc(sizeof(char*) * *count);
 
     if (result)
     {
@@ -480,7 +480,7 @@ void il2cpp_dump(const char *outDir) {
     auto mapStream = std::ifstream(mapLoc);
     mapStream.seekg(0, std::ifstream::end);
     auto mapStreamSize = mapStream.tellg();
-    char* mapTexts = malloc(mapStreamSize);
+    char* mapTexts = (char*)malloc(mapStreamSize + 1);
     mapStream.seekg(0);
     mapStream.read(mapTexts, mapStreamSize);
     mapStream.close();
@@ -489,9 +489,10 @@ void il2cpp_dump(const char *outDir) {
     auto splitted = str_split(mapTexts, '\n', &splitted_size);
     for (size_t i = 0; i < splitted_size; i++) {
         char* string = splitted[i];
-        if (std::strstr(string, "anon:scudo:secondary") <= 0) continue;
+        if (std::strstr(string, "anon:scudo:secondary") == NULL) continue;
         *std::strstr(string, " ") = '\0';
-        char** splitted2 = str_split(string, '-');
+        size_t unused;
+        char** splitted2 = str_split(string, '-', &unused);
         auto start = std::strtoul(splitted2[0], NULL, 0);
         auto end = std::strtoul(splitted2[1], NULL, 0);
         LOGI("searching on %p now", (void*)start);
