@@ -40,7 +40,7 @@ char** str_split(char* a_str, const char a_delim, size_t* count)
     {
         if (a_delim == *tmp)
         {
-            *count++;
+            (*count)++;
             last_comma = tmp;
         }
         tmp++;
@@ -51,7 +51,7 @@ char** str_split(char* a_str, const char a_delim, size_t* count)
 
     /* Add space for terminating null string so caller
        knows where the list of returned strings ends. */
-    *count++;
+    (*count)++;
 
     result = (char**)malloc(sizeof(char*) * *count);
 
@@ -480,7 +480,7 @@ void il2cpp_dump(const char *outDir) {
     auto mapStream = std::ifstream(mapLoc);
     mapStream.seekg(0, std::ifstream::end);
     auto mapStreamSize = mapStream.tellg();
-    char* mapTexts = (char*)malloc(mapStreamSize + 1);
+    char* mapTexts = (char*)malloc((int)mapStreamSize + 1);
     mapStream.seekg(0);
     mapStream.read(mapTexts, mapStreamSize);
     mapStream.close();
