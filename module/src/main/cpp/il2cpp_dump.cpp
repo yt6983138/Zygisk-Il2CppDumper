@@ -490,7 +490,7 @@ void il2cpp_dump(const char *outDir) {
     auto p = global_metadata_ptr + (*(unsigned int*)(global_metadata_ptr + 8) - 8);
     auto global_metadata_size = *(unsigned int*)p + *(unsigned int*)(p + 4);
     //auto global_metadata_size = 0x9AB614;
-    LOGI("length: %p", global_metadata_size);
+    LOGI("length: %d", global_metadata_size);
     for (int i = 0; i < global_metadata_size; i++)
     {
         metadataStream << global_metadata_ptr[i];
