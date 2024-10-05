@@ -440,19 +440,20 @@ void il2cpp_dump(const char *outDir) {
         global_metadata_ptr[3]);
     LOGI("searching length");
     char* pointer;
-    int endOffset = *(int*)(pointer + 8);
+    unsigned int endOffset = *(unsigned int*)(pointer + 8);
 
     auto nextOffset = endOffset;
     bool found = true;
     for (int offset = 0x8; offset < endOffset; offset += 0x8) {
-    	auto nowOffset = *(int*)(pointer + offset);
+    	auto nowOffset = *(unsigned int*)(pointer + offset);
     	if (nowOffset != nextOffset) {
     		found = false;
     		break;
     	}
-    	nextOffset = nowOffset + *(int*)(pointer + offset + 4);
+    	nextOffset = nowOffset + *(unsigned int*)(pointer + offset + 4);
     }
-    int global_metadata_size = nextOffset;
+    //int global_metadata_size = nextOffset;
+    int global_metadata_size = 0x9AB614;
     LOGI("length: %d", global_metadata_size);
     if (!found) {
         LOGI("Length not found");
