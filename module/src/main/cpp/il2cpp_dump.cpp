@@ -464,7 +464,7 @@ void il2cpp_dump(const char *outDir) {
         metadataStream << global_metadata_ptr[i];
     }
     
-    
+    metadataStream.close();
     LOGI("Phigros stuff end");
     // phigros spec shit end
     LOGI("dump done!");
