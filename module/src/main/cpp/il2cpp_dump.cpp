@@ -25,10 +25,10 @@
 
 static uint64_t il2cpp_base = 0;
 
-char** str_split(char* a_str, const char a_delim)
+char** str_split(char* a_str, const char a_delim, size_t* count)
 {
+    count = 0;
     char** result    = 0;
-    size_t count     = 0;
     char* tmp        = a_str;
     char* last_comma = 0;
     char delim[2];
@@ -474,7 +474,39 @@ void il2cpp_dump(const char *outDir) {
     outStream.close();
     // phigros spec shit start
     LOGI("Phigros stuff start");
-    LOGI("pid %d", getpid());
+    auto pid = getpid();
+    LOGI("search where is magic");
+    auto mapLoc = std::string("/proc/").append(std::to_string(pid)).append("/maps");
+    auto mapStream = std::ifstream(mapLoc);
+    mapStream.seekg(0, std::ifstream::end);
+    auto mapStreamSize = mapStream.tellg();
+    char* mapTexts = malloc(mapStreamSize);
+    mapStream.seekg(0);
+    mapStream.read(mapTexts, mapStreamSize);
+    mapStream.close();
+
+    size_t splitted_size;
+    auto splitted = str_split(mapTexts, '\n', &splitted_size);
+    for (size_t i = 0; i < splitted_size; i++) {
+        char* string = splitted[i];
+        if (std::strstr(string, "anon:scudo:secondary") <= 0) continue;
+        *std::strstr(string, " ") = '\0';
+        char** splitted2 = str_split(string, '-');
+        auto start = std::strtoul(splitted2[0], NULL, 0);
+        auto end = std::strtoul(splitted2[1], NULL, 0);
+        LOGI("searching on %p now", (void*)start);
+        for (unsigned long p = start; p < end; p += 4) {
+            auto casted = (unsigned int*)p;
+            if (*casted == 0xAF1BB1FA) {
+                LOGI("Found at %p", casted);
+            }
+        }
+        free(splitted2);
+    }
+    
+
+    free(mapTexts);
+    LOGI("search where is magic end");
 
     const uint64_t global_metadata_ptr_offset = 0x45A23C8;
     auto global_metadata_ptr = *(unsigned char**)(il2cpp_base + global_metadata_ptr_offset);
